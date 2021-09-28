@@ -33,7 +33,6 @@
 
 import adi
 import time
-import collections as col
 import math
 import simpleaudio as sa
 import numpy as np
@@ -65,18 +64,6 @@ note_d5 = np.sin(freq_d5 * t * 2 * np.pi)
 note_e5 = np.sin(freq_e5 * t * 2 * np.pi)
 note_f5 = np.sin(freq_f5 * t * 2 * np.pi)
 note_g5 = np.sin(freq_g5 * t * 2 * np.pi)
-
-#note_c4 = note_c4[:len(note_c4)//4]
-#note_d4 = note_d4[:len(note_c4)//4]
-#note_e4 = note_e4[:len(note_c4)//4]
-#note_f4 = note_f4[:len(note_c4)//4]
-#note_g4 = note_g4[:len(note_c4)//4]
-#
-#note_c5 = note_c5[:len(note_c4)//4]
-#note_d5 = note_d5[:len(note_c4)//4]
-#note_e5 = note_e5[:len(note_c4)//4]
-#note_f5 = note_f5[:len(note_c4)//4]
-#note_g5 = note_g5[:len(note_c4)//4]
 
 norm_c4 = note_c4 * 32767 / np.max(np.abs(note_c4))
 norm_c4 = norm_c4.astype(np.int16)
@@ -133,10 +120,8 @@ if __name__ == "__main__":
     for i in range(8):
         adpd1080.channel[i].offset = adpd1080.channel[i].offset + avg[i]
 
-    L0_tab = col.deque(5*[0], 5)
-    L1_tab = col.deque(5*[0], 5)
-    front0 = 0
-    front1 = 0
+    g0_incr = 0
+    g1_incr = 0
     has_gest0 = False
     has_gest1 = False
     algo_time0 = False
@@ -146,21 +131,17 @@ if __name__ == "__main__":
 
         L0 = data[0].sum() + data[1].sum() + data[2].sum() + data[3].sum()
         L1 = data[4].sum() + data[5].sum() + data[6].sum() + data[7].sum()
-        L0_tab.appendleft(L0)
-        L1_tab.appendleft(L1)
-        front0 = sum(L0_tab) / 5
-        front1 = sum(L1_tab) / 5
 
-        if front0 > 1000 and not has_gest0:
+        if L0 > 1000 and not has_gest0:
             has_gest0 = True
             start_x0 = (int(data[1].sum()) - int(data[0].sum())) / (int(data[1].sum()) + int(data[0].sum()))
             start_y0 = (int(data[3].sum()) - int(data[2].sum())) / (int(data[3].sum()) + int(data[2].sum()))
-        if front1 > 1000 and not has_gest1:
+        if L1 > 1000 and not has_gest1:
             has_gest1 = True
             start_x1 = (int(data[5].sum()) - int(data[4].sum())) / (int(data[5].sum()) + int(data[4].sum()))
             start_y1 = (int(data[7].sum()) - int(data[6].sum())) / (int(data[7].sum()) + int(data[6].sum()))
 
-        if front0 < 1000 and has_gest0:
+        if L0 < 1000 and has_gest0 and g0_incr >= 5:
             has_gest0 = False
             try:
                 end_x0 = (int(data[1].sum()) - int(data[0].sum())) / (int(data[1].sum()) + int(data[0].sum()))
@@ -169,7 +150,7 @@ if __name__ == "__main__":
                 end_x0 = 0.000001
                 end_y0 = 0.000001
             algo_time0 = True
-        if front1 < 1000 and has_gest1:
+        if L1 < 1000 and has_gest1 and g1_incr >= 5:
             has_gest1 = False
             try:
                 end_x1 = (int(data[5].sum()) - int(data[4].sum())) / (int(data[5].sum()) + int(data[4].sum()))
@@ -179,6 +160,15 @@ if __name__ == "__main__":
                 end_y1 = 0.000001
             algo_time1 = True
 
+        if L0 >= 1000:
+            g0_incr += 1
+        else:
+            g0_incr = 0
+        if L1 >= 1000:
+            g1_incr += 1
+        else:
+            g1_incr = 0
+
         if algo_time0:
             algo_time0 = False
             m = (start_y0 - end_y0) / (start_x0 - end_x0 + 0.000001)
@@ -187,7 +177,7 @@ if __name__ == "__main__":
                 gesture0 = "CLICK"
             else:
                 if abs(m) > 1:
-                    if start_y0 > end_y0:
+                    if start_y0 < end_y0:
                         gesture0 = "UP"
                     else:
                         gesture0 = "DOWN"
@@ -210,7 +200,7 @@ if __name__ == "__main__":
                 gesture1 = "CLICK"
             else:
                 if abs(m) > 1:
-                    if start_y1 > end_y1:
+                    if start_y1 < end_y1:
                         gesture1 = "UP"
                     else:
                         gesture1 = "DOWN"
