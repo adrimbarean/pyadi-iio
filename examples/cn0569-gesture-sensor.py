@@ -120,6 +120,8 @@ if __name__ == "__main__":
     for i in range(8):
         adpd1080.channel[i].offset = adpd1080.channel[i].offset + avg[i]
 
+    adpd1080.sample_rate = 512
+
     g0_incr = 0
     g1_incr = 0
     has_gest0 = False
