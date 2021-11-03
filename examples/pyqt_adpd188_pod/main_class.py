@@ -149,6 +149,7 @@ class adpd188_8pod_gui(mainwindow.Ui_MainWindow):
         self.adpd_pod_tab[0]._rx_data_type = ["<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<i8"]
         self.thread_q[0].data_rdy.connect(self.plot_data)
         self.thread_q[0].start()
+        self.adpd_pod_tab[0].rx_buffer_size = 64
 
     def try_connect_pi2(self):
         try:
@@ -184,6 +185,7 @@ class adpd188_8pod_gui(mainwindow.Ui_MainWindow):
         ]
         self.adpd_pod_tab[1]._rx_data_type = ["<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<i8"]
         self.thread_q[1].start()
+        self.adpd_pod_tab[1].rx_buffer_size = 64
 
     def try_connect_pi3(self):
         try:
@@ -219,6 +221,7 @@ class adpd188_8pod_gui(mainwindow.Ui_MainWindow):
         ]
         self.adpd_pod_tab[2]._rx_data_type = ["<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<u4","<i8"]
         self.thread_q[2].start()
+        self.adpd_pod_tab[2].rx_buffer_size = 64
 
     def try_connect_pi4(self):
         try:
@@ -258,6 +261,7 @@ class adpd188_8pod_gui(mainwindow.Ui_MainWindow):
     def insert_comment(self):
         self.add_comment = [True, True, True, True]
         self.ln_rd_status.setText("Comment added: " + self.lnEditComment.text())
+        self.adpd_pod_tab[3].rx_buffer_size = 64
 
     def close_save_file(self):
         for thr in self.thread_q:
