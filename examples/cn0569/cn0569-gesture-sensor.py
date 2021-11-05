@@ -105,7 +105,7 @@ theremin_args1 = {
 if __name__ == "__main__":
 
     # Set up ADPD1080
-    adpd1080 = adi.adpd1080(uri="serial:COM23")
+    adpd1080 = adi.adpd1080(uri="serial:COM4")
     adpd1080._ctrl.context.set_timeout(0)
     adpd1080.rx_buffer_size = 8
     adpd1080.sample_rate = 10
@@ -117,10 +117,10 @@ if __name__ == "__main__":
             avg[idx] += val.sum()
     avg = [int(x / 5) for x in avg]
 
-    for i in range(8):
-        adpd1080.channel[i].offset = adpd1080.channel[i].offset + avg[i]
+#    for i in range(8):
+#        adpd1080.channel[i].offset = adpd1080.channel[i].offset + avg[i]
 
-    adpd1080.sample_rate = 512
+#    adpd1080.sample_rate = 512
 
     g0_incr = 0
     g1_incr = 0
@@ -130,6 +130,9 @@ if __name__ == "__main__":
     algo_time1 = False
     while True:
         data = adpd1080.rx()
+        for i, ch in enumerate(data):
+            ch -= min(ch, avg[i])
+        print(data)
 
         L0 = data[0].sum() + data[1].sum() + data[2].sum() + data[3].sum()
         L1 = data[4].sum() + data[5].sum() + data[6].sum() + data[7].sum()
