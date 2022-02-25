@@ -1,3 +1,4 @@
+import ctypes
 import os
 import sys
 import threading
@@ -398,6 +399,8 @@ class adpd188_8pod_gui(mainwindow.Ui_MainWindow):
 
 
 if __name__ == "__main__":
+
+    ctypes.windll.kernel32.SetDllDirectoryW(None)
 
     # build the application and the window
     app = QtWidgets.QApplication(sys.argv)
